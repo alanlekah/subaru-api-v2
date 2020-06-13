@@ -1,7 +1,7 @@
 # Subaru V2 Lambda API
 
 ## Notes
-This project only works with Python3.6, the selenium + lambda compatability issues are too much to deal with if you try > 3.7.
+- This project only works with Python3.6, the selenium + lambda compatibility issues are too much to deal with if you try > 3.7.
 
 ## Usage
 - Create a lambda folder in the root of this project and place the following files:
@@ -31,3 +31,7 @@ You will most likely want to include the following after the `zappa init` step (
 ## Disclaimer
 
 Subaru has no official V1 API. This project may not work forever. Use at your own risk but raise issues as needed.
+
+## Future Work
+
+My next goal is to trigger Alarm / Horn + Location and send back all the information like status via SNS.
