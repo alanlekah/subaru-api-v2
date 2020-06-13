@@ -1,4 +1,3 @@
-import time
 import os
 import sys
 from selenium import webdriver
@@ -8,7 +7,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from zappa.asynchronous import task
 from flask import Flask
-
 app = Flask(__name__)
 
 
