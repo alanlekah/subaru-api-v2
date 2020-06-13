@@ -1,5 +1,8 @@
 # Subaru V2 Lambda API
 
+## Notes
+This project only works with Python3.6, the selenium + lambda compatability issues are too much to deal with if you try > 3.7.
+
 ## Usage
 - Create a lambda folder in the root of this project and place the following files:
   - chromedriver
