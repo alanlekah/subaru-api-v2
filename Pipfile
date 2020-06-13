@@ -9,6 +9,8 @@ verify_ssl = true
 selenium = "==3.14"
 flask = "*"
 zappa = "*"
+black = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.6"
