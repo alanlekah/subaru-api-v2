@@ -40,4 +40,4 @@ Subaru has no official V1 API. This project may not work forever. Use at your ow
 
 ## Future Work
 
-My next goal is to trigger Alarm / Horn + Location and send back all the information like status via SNS.
+My next goal is to trigger Alarm / Horn and simiarly send that status message back via SNS. That should be the final feature for the Gen 1 APIs for Subaru starlink.
