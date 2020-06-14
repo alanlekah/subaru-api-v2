@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from zappa.asynchronous import task
 from flask import Flask
+import pyshorteners
+import boto3
 
 app = Flask(__name__)
 
@@ -81,13 +83,24 @@ def login_to_starlink(
 
 
 @task
-def starlink_action(action: str) -> bool:
+def send_to_sns(message: str, number: str) -> str:
+    sns = boto3.client("sns")
+    sns.publish(PhoneNumber=number, Message=message)
+    return "Completed Send to SNS"
+
+
+@task
+def starlink_action(action: str) -> str:
     """
     Given a driver and a action [lock, unlock], go ahead and login to starlink and perform the action
     Returning back a string with the actions return message
     :param action:
     :return:
     """
+
+    # ------------------------------------------------------------------------------------------------------
+
+    shortener = pyshorteners.Shortener()
 
     # ------------------------------------------------------------------------------------------------------
 
@@ -103,6 +116,8 @@ def starlink_action(action: str) -> bool:
     username = os.environ.get("USERNAME")
     password = os.environ.get("PASSWORD")
 
+    text_number = os.environ.get("PHONE_NUMBER")
+
     # ------------------------------------------------------------------------------------------------------
 
     options = Options()
@@ -116,7 +131,7 @@ def starlink_action(action: str) -> bool:
     driver = webdriver.Chrome("lambda/chromedriver", options=options)
 
     print(f"Processing {action} action..")
-    if action not in ["lock", "unlock"]:
+    if action not in ["lock", "unlock", "locate"]:
         sys.exit("Unsupported action provided!")
 
     # ------------------------------------------------------------------------------------------------------
@@ -150,19 +165,48 @@ def starlink_action(action: str) -> bool:
 
     # ------------------------------------------------------------------------------------------------------
 
-    # Return back the status message from Subaru
-    status_message_xpath = '//div[@id="starlinkActions"]//div[@role="alert"]/*/span[@class="statusMessage"]'
+    if action in ["lock", "unlock"]:
+        # Return back the status message from Subaru
+        status_message_xpath = '//div[@id="starlinkActions"]//div[@role="alert"]/*/span[@class="statusMessage"]'
 
-    # Wait for status message
-    WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.XPATH, status_message_xpath))
-    )
+        # Wait for status message
+        WebDriverWait(driver, 20).until(
+            EC.visibility_of_element_located((By.XPATH, status_message_xpath))
+        )
 
-    status_message = driver.find_element_by_xpath(status_message_xpath)
-    status_message_text = status_message.text
+        status_message = driver.find_element_by_xpath(status_message_xpath)
+        status_message_text = status_message.text
 
-    print(f"Status: '{status_message_text}'")
-    return True
+        print(f"Status: '{status_message_text}'")
+
+        if text_number:
+            send_to_sns(status_message_text, text_number)
+
+    elif action == "locate":
+        located_message_xpath = '//div[@id="map_canvas"]'
+
+        # Wait for located successful message
+        WebDriverWait(driver, 45).until(
+            EC.visibility_of_element_located((By.XPATH, located_message_xpath))
+        )
+
+        google_maps_navigate_button = driver.find_element_by_xpath(
+            '//div[@class="map-location__action actionOnMap"]/img[@alt="Nav"]'
+        )
+        google_maps_navigate_button.click()
+
+        # switch to the google maps window and get the url
+        driver.switch_to.window(driver.window_handles[1])
+
+        current_url = driver.current_url
+        shortened_url = shortener.tinyurl.short(current_url)
+
+        print(f"Shortened from {current_url} to {shortened_url}")
+
+        if text_number and shortened_url and current_url:
+            send_to_sns(shortened_url, text_number)
+
+    return "Completed Starlink Action"
 
 
 def starlink_action_wrapper(action: str):
@@ -171,11 +215,8 @@ def starlink_action_wrapper(action: str):
     :param action:
     :return:
     """
-    try:
-        starlink_action(action)
-    except:
-        print("Unexpected error:", sys.exc_info()[0])
 
+    starlink_action(action)
     return {"statusCode": 200, "body": "OK"}
 
 
@@ -189,5 +230,10 @@ def unlock():
     return starlink_action_wrapper("unlock")
 
 
+@app.route("/locate")
+def locate():
+    return starlink_action_wrapper("locate")
+
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
