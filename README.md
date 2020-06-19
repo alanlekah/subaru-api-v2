@@ -25,7 +25,8 @@ You will most likely want to include the following after the `zappa init` step (
         "SECURITY_Q&A": "< LIST OF SECURITY QUESTIONS AND ANSWERS IN THE FORMAT - 'QUESTION1:ANSWER1,QUESTION2:ANSWER2,QUESTION3:ANSWER3' >",
         "USERNAME": "< SUBARU LOGIN - USERNAME >",
         "PASSWORD": "< SUBARU LOGIN - PASSWORD >",
-        "PHONE_NUMBER": "< YOUR PHONE NUMBER STARTING WITH +1 FOR USA - THIS IS AN OPTIONAL ENV VAR>"
+        "PHONE_NUMBER": "< YOUR PHONE NUMBER STARTING WITH +1 FOR USA >", # Optional env var
+        "TZ": "< US/Eastern >" # Added to use a specific timezone spoofing for chrome
     },
     "timeout_seconds": 80,
     "extra_permissions": [{
