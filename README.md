@@ -39,6 +39,10 @@ You will most likely want to include the following after the `zappa init` step (
 
 Subaru has no official V1 API. This project may not work forever. Use at your own risk but raise issues as needed.
 
+## How I use this Lambda
+
+I have created Google Assistant -> Webhook IFTTT triggers which call the output URL from this Zappa deploy. This way I can trigger it from Google Assistant using any voice trigger I'd like (even though its async).
+
 ## Future Work
 
 My next goal is to trigger Alarm / Horn and simiarly send that status message back via SNS. That should be the final feature for the Gen 1 APIs for Subaru starlink.
